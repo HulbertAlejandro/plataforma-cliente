@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="420.0" prefWidth="420.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.uniquindio.plataforma.controladores.bienvenidaControlador">
+   <children>
+      <ImageView fitHeight="187.0" fitWidth="277.0" layoutX="72.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../imagenes/UQINICIO2.png" />
+         </image>
+      </ImageView>
+      <Label layoutX="143.0" layoutY="138.0" text="¿Qué rol tienes?">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Button fx:id="btnEnvio" layoutX="123.0" layoutY="345.0" mnemonicParsing="false" onAction="#irEnvio" prefHeight="25.0" prefWidth="175.0" text="GESTOR DE ENVÍO">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+      <Button fx:id="btnProcesamiento" layoutX="118.0" layoutY="295.0" mnemonicParsing="false" onAction="#irProcesamiento" text="GESTOR DE PROCESAMIENTO">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+      <Button fx:id="btnAdmin" layoutX="123.0" layoutY="198.0" mnemonicParsing="false" onAction="#irAdmin" prefHeight="25.0" prefWidth="175.0" text="ADMINISTRADOR">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+      <Button fx:id="btnSocio" layoutX="123.0" layoutY="245.0" mnemonicParsing="false" onAction="#irSocio" prefHeight="25.0" prefWidth="175.0" text="SOCIO/PUBLICADOR">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+   </children>
+</AnchorPane>

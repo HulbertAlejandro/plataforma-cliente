@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="335.0" prefWidth="435.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.uniquindio.plataforma.controladores.loginAdminControlador">
+   <children>
+      <ImageView fitHeight="174.0" fitWidth="304.0" layoutX="65.0" layoutY="23.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../imagenes/UQINICIO.png" />
+         </image>
+      </ImageView>
+      <PasswordField fx:id="btnContrasena" layoutX="120.0" layoutY="195.0" prefHeight="25.0" prefWidth="195.0" promptText="Ingrese su contraseña" />
+      <TextField fx:id="usuario" layoutX="120.0" layoutY="147.0" prefHeight="25.0" prefWidth="195.0" promptText="Ingrese su usuario" />
+      <Button fx:id="btnIniciar" layoutX="120.0" layoutY="239.0" mnemonicParsing="false" onAction="#iniciarSesion" prefHeight="25.0" prefWidth="195.0" text="INICIAR SESIÓN">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Button>
+      <Button fx:id="btnAtras" layoutX="119.0" layoutY="285.0" mnemonicParsing="false" onAction="#atras" prefHeight="25.0" prefWidth="195.0" text="ATRÁS">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Button>
+   </children>
+</AnchorPane>
