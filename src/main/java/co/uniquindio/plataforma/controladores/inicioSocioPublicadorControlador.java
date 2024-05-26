@@ -17,7 +17,10 @@ import org.w3c.dom.Element;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -59,30 +62,102 @@ public class inicioSocioPublicadorControlador implements Initializable {
     private void cargarXML() {
         // Crear un FileChooser
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Seleccionar archivo");
+        fileChooser.setTitle("Seleccionar archivos");
 
-        // Mostrar el diálogo para seleccionar un archivo
-        File selectedFile = fileChooser.showOpenDialog(stage);
+        // Configurar extensiones permitidas
+        FileChooser.ExtensionFilter extFilterAll = new FileChooser.ExtensionFilter("Todos los archivos soportados", "*.xml", "*.png", "*.jpg", "*.jpeg", "*.zip");
+        FileChooser.ExtensionFilter extFilterXML = new FileChooser.ExtensionFilter("Archivos XML (*.xml)", "*.xml");
+        FileChooser.ExtensionFilter extFilterImages = new FileChooser.ExtensionFilter("Imágenes (PNG, JPG)", "*.png", "*.jpg", "*.jpeg");
+        FileChooser.ExtensionFilter extFilterZip = new FileChooser.ExtensionFilter("Archivos ZIP (*.zip)", "*.zip");
 
-        // Si un archivo es seleccionado, cargar la noticia desde el archivo XML
-        if (selectedFile != null) {
-            Noticia noticia = leerNoticiaDesdeXML(selectedFile.getPath());
-            if (noticia != null) {
-                // Registrar la noticia en la plataforma
-                String mensaje = plataformaCliente.registrarNoticia(noticia.getTitulo(), noticia.getContenido(), noticia.getAutor(), noticia.getFecha());
-                mostrarMensaje(Alert.AlertType.INFORMATION, mensaje);
+        fileChooser.getExtensionFilters().addAll(extFilterAll, extFilterXML, extFilterImages, extFilterZip);
 
-                // Actualizar la tabla después de registrar la noticia
-                llenarTabla();
-            } else {
-                mostrarMensaje(Alert.AlertType.ERROR, "El archivo XML no contiene una noticia válida.");
+        // Mostrar el diálogo para seleccionar múltiples archivos
+        List<File> selectedFiles = fileChooser.showOpenMultipleDialog(stage);
+
+        // Si se seleccionan archivos, procesar cada uno
+        if (selectedFiles != null) {
+            for (File file : selectedFiles) {
+                String extension = getFileExtension(file);
+
+                if (extension.equalsIgnoreCase("xml")) {
+                    copiarYRegistrarArchivoXML(file);
+                } else if (extension.equalsIgnoreCase("png") || extension.equalsIgnoreCase("jpg") || extension.equalsIgnoreCase("jpeg")) {
+                    manejarImagen(file);
+                } else if (extension.equalsIgnoreCase("zip")) {
+                    manejarArchivoZip(file);
+                }
             }
         } else {
             System.out.println("Ningún archivo seleccionado.");
         }
     }
 
-    public Noticia leerNoticiaDesdeXML(String rutaArchivo) {
+    private void copiarYRegistrarArchivoXML(File archivoXML) {
+        try {
+            // Copiar el archivo XML a la carpeta del socio
+            String directorioSocio = plataformaCliente.getSocioPublicador().getRutaArticulos() + File.separator + plataformaCliente.getSocioPublicador().getId();
+            crearCarpeta(directorioSocio);
+            File destino = new File(directorioSocio + File.separator + archivoXML.getName());
+            Files.copy(archivoXML.toPath(), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            mostrarMensaje(Alert.AlertType.INFORMATION, "Archivo XML subido con éxito: " + archivoXML.getName());
+
+            // Leer la noticia desde el archivo XML y registrarla
+            Noticia noticia = leerNoticiaDesdeXML(archivoXML.getPath());
+            if (noticia != null) {
+                String mensaje = plataformaCliente.registrarNoticia(noticia.getTitulo(), noticia.getContenido(), noticia.getAutor(), noticia.getFecha());
+                mostrarMensaje(Alert.AlertType.INFORMATION, mensaje);
+                llenarTabla();
+            } else {
+                mostrarMensaje(Alert.AlertType.ERROR, "El archivo XML no contiene una noticia válida.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            mostrarMensaje(Alert.AlertType.ERROR, "Error al subir el archivo XML: " + archivoXML.getName());
+        }
+    }
+
+    private String getFileExtension(File file) {
+        String fileName = file.getName();
+        if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0) {
+            return fileName.substring(fileName.lastIndexOf(".") + 1);
+        } else {
+            return "";
+        }
+    }
+
+    private void manejarImagen(File imagen) {
+        try {
+            String directorioImagenes = plataformaCliente.getSocioPublicador().getRutaArticulos() + File.separator + plataformaCliente.getSocioPublicador().getId();
+            crearCarpeta(directorioImagenes);
+            Files.copy(imagen.toPath(), new File(directorioImagenes + File.separator + imagen.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+            mostrarMensaje(Alert.AlertType.INFORMATION, "Imagen subida con éxito: " + imagen.getName());
+        } catch (IOException e) {
+            e.printStackTrace();
+            mostrarMensaje(Alert.AlertType.ERROR, "Error al subir la imagen: " + imagen.getName());
+        }
+    }
+
+    private void manejarArchivoZip(File archivoZip) {
+        try {
+            String directorioZip = plataformaCliente.getSocioPublicador().getRutaArticulos() + File.separator + plataformaCliente.getSocioPublicador().getId();
+            crearCarpeta(directorioZip);
+            Files.copy(archivoZip.toPath(), new File(directorioZip + File.separator + archivoZip.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+            mostrarMensaje(Alert.AlertType.INFORMATION, "Archivo ZIP subido con éxito: " + archivoZip.getName());
+        } catch (IOException e) {
+            e.printStackTrace();
+            mostrarMensaje(Alert.AlertType.ERROR, "Error al subir el archivo ZIP: " + archivoZip.getName());
+        }
+    }
+
+    public void crearCarpeta(String ruta) {
+        File carpeta = new File(ruta);
+        if (!carpeta.exists()) {
+            carpeta.mkdirs();
+        }
+    }
+
+    private Noticia leerNoticiaDesdeXML(String rutaArchivo) {
         try {
             File archivoXML = new File(rutaArchivo);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -107,7 +182,7 @@ public class inicioSocioPublicadorControlador implements Initializable {
             String publicador = docCopyrightElement.getTextContent();
             String contenido = bodyContentElement.getTextContent();
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
             LocalDate fechaLocal = LocalDate.parse(fechaStr, formatter);
 
@@ -144,24 +219,5 @@ public class inicioSocioPublicadorControlador implements Initializable {
         });
 
         noticiasTableView.setItems(FXCollections.observableArrayList(plataformaCliente.getSocioPublicador().getNoticias()));
-    }
-
-    @FXML
-    private void cargarNoticiasEnClientes() {
-
-        ArrayList<Noticia> noticias = plataformaCliente.listarNoticias(); // Obtener el ArrayList de noticias (por ejemplo)
-
-        if (noticias != null && !noticias.isEmpty()) {
-            ArrayList<Cliente> clientes = plataformaCliente.listarClientes(); // Obtener la lista de clientes (por ejemplo)
-
-            if (clientes != null && !clientes.isEmpty()) {
-                // Llamar al método para cargar las noticias en las carpetas de los clientes
-                plataformaCliente.cargarNoticiasEnClientes(clientes, noticias);
-            } else {
-                System.out.println("No hay clientes disponibles para cargar las noticias.");
-            }
-        } else {
-            System.out.println("El ArrayList de noticias está vacío o nulo.");
-        }
     }
 }
